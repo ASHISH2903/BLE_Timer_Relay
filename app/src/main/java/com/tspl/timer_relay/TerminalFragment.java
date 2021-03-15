@@ -235,7 +235,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         select_span_time = (EditText) view.findViewById( R.id.select_span_time );
         select_cycle_time = (EditText) view.findViewById( R.id.select_cycle_time );
         select_sequence = (EditText) view.findViewById( R.id.select_sequence );
-        select_sequence.setFilters( new InputFilter[]{new InputFilter.LengthFilter( 8 )} );
+        select_sequence.setFilters( new InputFilter[]{new InputFilter.LengthFilter( 15 )} );
 
         btn_dcs_send = (Button) view.findViewById( R.id.btn_dcs_send );
 
@@ -262,15 +262,17 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             }
         } );
 
-        /******************* LOGIN BUTTON CLICK EVENT *******************/
+        /******************* LOGOUT BUTTON CLICK EVENT *******************/
         logout_btn.setOnClickListener( v -> {
+            disconnect();
             Intent mainPage = new Intent( getContext(), MainActivity.class );
             startActivity( mainPage );
         } );
 
+        /******************* LOGIN BUTTON CLICK EVENT *******************/
         login_to_device.setOnClickListener( v -> {
 
-            String get_pwd = edt_txt_password.getText().toString();
+            String get_pwd = edt_txt_password.getText().toString().toUpperCase();
 
             if (get_pwd.length() == 0) {
                 edt_txt_password.requestFocus();
@@ -279,7 +281,6 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
             String message = "PWD:" + get_pwd;
             send( message );
-
         } );
 
         /******************* RESET PASSWORD CLICK EVENT *******************/
@@ -316,8 +317,9 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             @Override
             public void onClick(View v) {
                 relay_status_linear_view.setVisibility( View.VISIBLE );
+                receiveText.setVisibility( View.VISIBLE );
                 String message = "READ";
-                byte[] bytes = message.getBytes( Charset.defaultCharset() );
+                //byte[] bytes = message.getBytes( Charset.defaultCharset() );
                 config_linear_page.setVisibility( View.GONE );
                 setup_linear_page.setVisibility( View.GONE );
                 reset_password_linear_page.setVisibility( View.GONE );
@@ -336,7 +338,6 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                 reset_password_linear_page.setVisibility( View.GONE );
                 relay_status_linear_view.setVisibility( View.GONE );
                 dcs_linear_page.setVisibility( View.GONE );
-
             }
         } );
 
@@ -530,17 +531,31 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                 m = m * 60;
                 s = Integer.parseInt( cycle_Time[2] );
                 int Full_Cycle_Time = h + m + s;
+
+                int totalSpanAndOnTime = Full_On_Time + Full_Span_Time;
+
                 String dcs_cycle_time = String.valueOf( Full_Cycle_Time );
 
                 /**** SEQUENCE TIME ****/
                 sequence = select_sequence.getText().toString();
 
-                String message = "DCS:" + dcs_on_time + "," + dcs_span_time + "," + dcs_cycle_time + "," + sequence;
-                send( message );
-                select_on_time.setText( "" );
-                select_span_time.setText( "" );
-                select_cycle_time.setText( "" );
-                select_sequence.setText( "" );
+                String timeTotal[] = sequence.split( "," );
+
+                totalSpanAndOnTime = totalSpanAndOnTime * timeTotal.length;
+
+                if(totalSpanAndOnTime > Full_Cycle_Time){
+                    select_sequence.requestFocus();
+                    select_sequence.setError( "Limit Exist" );
+                    select_sequence.setText( "" );
+                }
+                else{
+                    String message = "DCS:" + dcs_on_time + "," + dcs_span_time + "," + dcs_cycle_time + "," + sequence;
+                    send( message );
+                    select_on_time.setText( "" );
+                    select_span_time.setText( "" );
+                    select_cycle_time.setText( "" );
+                    select_sequence.setText( "" );
+                }
             }
         } );
 
@@ -658,22 +673,22 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                     msg = msg + "0,";
                 }
                 if (ch4.isChecked()) {
-                    msg = msg + "1";
+                    msg = msg + "1,";
                 } else {
                     msg = msg + "0,";
                 }
                 if (ch5.isChecked()) {
-                    msg = msg + "1";
+                    msg = msg + "1,";
                 } else {
                     msg = msg + "0,";
                 }
                 if (ch6.isChecked()) {
-                    msg = msg + "1";
+                    msg = msg + "1,";
                 } else {
                     msg = msg + "0,";
                 }
                 if (ch7.isChecked()) {
-                    msg = msg + "1";
+                    msg = msg + "1,";
                 } else {
                     msg = msg + "0,";
                 }
@@ -814,7 +829,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         try {
             SpannableStringBuilder spn = new SpannableStringBuilder( str + '\n' );
             spn.setSpan( new ForegroundColorSpan( getResources().getColor( R.color.colorSendText ) ), 0, spn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE );
-            receiveText.append( spn );
+            //receiveText.append( spn );
             byte[] data = (str + '\n').getBytes();
             socket.write( data );
         } catch (Exception e) {
@@ -823,28 +838,29 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     }
 
     private void receive(byte[] data) {
-        receiveText.append( new String( data ) );
+        receiveText.setText( new String( data ) );
     }
 
     private void status(String str) {
         if (str.equals( "connected" )) {
             SpannableStringBuilder spn = new SpannableStringBuilder( str + '\n' );
             spn.setSpan( new ForegroundColorSpan( getResources().getColor( R.color.colorStatusText ) ), 0, spn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE );
-            receiveText.append( spn );
+            //receiveText.append( spn );
             status_connected.setBackgroundDrawable( getResources().getDrawable( R.drawable.connection_on ) );
-            //login_linear_page.setVisibility( View.VISIBLE );
-            mainPageline.setVisibility( View.VISIBLE );
+            login_linear_page.setVisibility( View.VISIBLE );
+            //mainPageline.setVisibility( View.VISIBLE );
             Toast.makeText( service, "Device connected...", Toast.LENGTH_SHORT ).show();
         } else {
             SpannableStringBuilder spn = new SpannableStringBuilder( str + '\n' );
             spn.setSpan( new ForegroundColorSpan( getResources().getColor( R.color.colorStatusText ) ), 0, spn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE );
-            receiveText.append( spn );
+            //receiveText.append( spn );
         }
     }
 
     /*
      * SerialListener
      */
+
     @Override
     public void onSerialConnect() {
         status( "connected" );
@@ -859,7 +875,20 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     @Override
     public void onSerialRead(byte[] data) {
-        receive( data );
+        String password = new String(data);
+        if(password.equals( "correct\n" )){
+            mainPageline.setVisibility( View.VISIBLE );
+            login_linear_page.setVisibility( View.GONE );
+        }
+        else if(password.equals( "wrong\n" )){
+            edt_txt_password.requestFocus();
+            edt_txt_password.setError( "Incorrect Password" );
+            edt_txt_password.setText( "" );
+        }else{
+            receive( password.getBytes() );
+            receive( password.getBytes() );
+        }
+
     }
 
     @Override

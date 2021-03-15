@@ -30,4 +30,9 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         onBackPressed();
         return true;
     }
+
+    @Override
+    public void onBackPressed() {
+        //
+    }
 }

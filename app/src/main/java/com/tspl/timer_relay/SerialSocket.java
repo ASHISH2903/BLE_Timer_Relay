@@ -192,6 +192,8 @@ class SerialSocket extends BluetoothGattCallback {
                 readCharacteristic = gattService.getCharacteristic(BLUETOOTH_LE_RN4870_CHAR_RW);
                 writeCharacteristic = gattService.getCharacteristic(BLUETOOTH_LE_RN4870_CHAR_RW);
             }
+
+            // For Company
             if (gattService.getUuid().equals(UUID.fromString("0783b03e-8535-b5a0-7140-a304d2495cb7"))) {
                 Log.d(TAG, "service nrf uart");
                 //for(BluetoothGattCharacteristic characteristic : gattService.getCharacteristics())

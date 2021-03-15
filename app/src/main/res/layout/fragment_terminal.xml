@@ -179,11 +179,11 @@
 
             android:layout_width="match_parent"
             android:layout_height="500dp"
-            android:freezesText="true"
-            android:gravity="bottom"
+            android:freezesText="false"
+            android:gravity="top"
             android:scrollbars="vertical"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
         <View
             android:layout_width="match_parent"
@@ -195,7 +195,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:orientation="horizontal"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <EditText
                 android:id="@+id/send_text"
@@ -204,13 +204,13 @@
                 android:layout_weight="1"
                 android:inputType="text|textNoSuggestions"
                 android:singleLine="true"
-                android:visibility="visible" />
+                android:visibility="gone" />
 
             <ImageButton
                 android:id="@+id/send_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="visible"
+                android:visibility="gone"
                 app:srcCompat="@drawable/ic_send_white_24dp" />
         </LinearLayout>
     </LinearLayout>
@@ -241,7 +241,7 @@
             android:id="@+id/edt_txt_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberPassword" />
+            android:inputType="textPassword" />
 
         <View
             android:layout_width="2dp"
